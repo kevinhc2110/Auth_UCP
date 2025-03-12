@@ -2,3 +2,6 @@
 .env
 .env.local
 .env.*.local
+
+# Ignorar clava segura
+internal/security/private.pem

@@ -16,10 +16,11 @@ func LoadEnv() {
 }
 
 // GetEnv obtiene una variable de entorno con una clave específica
-func GetEnv(key string) string {
+func GetEnv(key, defaultValue string) string {
 	value := os.Getenv(key)
 	if value == "" {
-		log.Printf("Advertencia: La variable de entorno %s no está definida\n", key)
+		log.Printf("Advertencia: La variable de entorno %s no está definida, usando valor por defecto: %s\n", key, defaultValue)
+		return defaultValue
 	}
 	return value
 }

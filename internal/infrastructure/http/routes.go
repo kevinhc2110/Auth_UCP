@@ -8,11 +8,13 @@ import (
 // SetupRoutes define las rutas de la API
 func SetupRoutes(router *gin.Engine, authHandler *handlers.AuthHandler, userHandler *handlers.UserHandler) {
 	api := router.Group("/api")
+	api.Use(AuthMiddleware())
 	{
 		// Rutas de autenticación
 		api.POST("/login", authHandler.Login)
 		api.POST("/refresh", authHandler.RefreshToken)
 		api.POST("/logout", authHandler.Logout)
+		api.GET("/public-key", handlers.PublicKeyHandler)
 
 		// Rutas de usuario
 		api.POST("/register", userHandler.CreateUser)

@@ -4,10 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/kevinhc2110/Degree-project-UCP/internal/domain"
 	"github.com/kevinhc2110/Degree-project-UCP/internal/repositories"
+	"github.com/kevinhc2110/Degree-project-UCP/internal/usecases"
+	"github.com/lib/pq"
 )
 
 type UserRepositoryPg struct {
@@ -25,9 +28,17 @@ func (r *UserRepositoryPg) Create(ctx context.Context, user *domain.User) error 
 		user.ID, user.Identification, user.Name, user.Lastname, user.Email, user.Password, user.Role,
 		user.Active, user.CreatedAt, user.UpdatedAt, user.LastLoginAt,
 	)
-	return err
-}
 
+	if err != nil {
+		if pgErr, ok := err.(*pq.Error); ok {
+			if pgErr.Code == "23505" { // Código de error para violación de restricción UNIQUE
+				return usecases.ErrEmailAlreadyExists
+			}
+		}
+		return fmt.Errorf("error al crear el usuario en la base de datos: %w", err)
+	}
+	return nil
+}
 
 func (r *UserRepositoryPg) FindByIdentification(ctx context.Context, identification string) (*domain.User, error) {
 	var user domain.User
@@ -36,11 +47,11 @@ func (r *UserRepositoryPg) FindByIdentification(ctx context.Context, identificat
 		&user.ID, &user.Identification, &user.Email, &user.Password,
 		&user.Active, &user.CreatedAt, &user.UpdatedAt,
 	)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, usecases.ErrUserNotFound
+	}
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errors.New("usuario no encontrado")
-		}
-		return nil, err
+		return nil, fmt.Errorf("error al buscar usuario por identificación: %w", err)
 	}
 	return &user, nil
 }
@@ -52,11 +63,11 @@ func (r *UserRepositoryPg) FindByEmail(ctx context.Context, email string) (*doma
 		&user.ID, &user.Identification, &user.Email, &user.Password,
 		&user.Active, &user.CreatedAt, &user.UpdatedAt,
 	)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, usecases.ErrUserNotFound
+	}
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errors.New("usuario no encontrado")
-		}
-		return nil, err
+		return nil, fmt.Errorf("error al buscar usuario por email: %w", err)
 	}
 	return &user, nil
 }
@@ -64,11 +75,19 @@ func (r *UserRepositoryPg) FindByEmail(ctx context.Context, email string) (*doma
 func (r *UserRepositoryPg) Update(ctx context.Context, user *domain.User) error {
 	query := `UPDATE users SET identification = $1, email = $2, password = $3, active = $4, updated_at = $5 WHERE id = $6`
 	_, err := r.db.ExecContext(ctx, query, user.Identification, user.Email, user.Password, user.Active, user.UpdatedAt, user.ID)
-	return err
+
+	if err != nil {
+		return errors.New("error al actualizar el usuario")
+	}
+	return nil
 }
 
 func (r *UserRepositoryPg) Delete(ctx context.Context, id uuid.UUID) error {
 	query := `DELETE FROM users WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
-	return err
+
+	if err != nil {
+		return errors.New("error al eliminar el usuario")
+	}
+	return nil
 }

@@ -14,10 +14,9 @@ import (
 )
 
 var (
-	ErrUserNotFound       = errors.New("user not found")
-	ErrEmailAlreadyExists = errors.New("email already exists")
-	ErrInvalidCredentials = errors.New("invalid credentials")
-	ErrInvalidRole        = errors.New("invalid role")
+	ErrUserNotFound       = errors.New("usario no encontrado")
+	ErrEmailAlreadyExists = errors.New("el email ya esta registrado en una cuenta")
+	ErrInvalidCredentials = errors.New("credenciales invalidas")
 )
 
 type UserUseCase struct {
@@ -33,6 +32,11 @@ func (uc *UserUseCase) CreateUser(ctx context.Context, user *domain.User) error 
 	// Validar usuario
 	if err := validation.ValidateUser(user); err != nil {
 		return err
+	}
+
+	// Verificar si el correo ya está registrado
+	if existingUser, _ := uc.repo.FindByEmail(ctx, user.Email); existingUser != nil {
+		return ErrEmailAlreadyExists
 	}
 
 	// Cifrar la contraseña
@@ -90,4 +94,3 @@ func (uc *UserUseCase) DeleteUser(ctx context.Context, id uuid.UUID) error {
 	}
 	return nil
 }
-

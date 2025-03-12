@@ -11,11 +11,12 @@ import (
 )
 
 var (
-	ErrSessionNotFound    = errors.New("session not found")
-	ErrSessionBlocked     = errors.New("session is blocked")
-	ErrInvalidSession     = errors.New("invalid session token")
-	ErrSessionExpired     = errors.New("session has expired")
-	ErrInvalidDuration    = errors.New("invalid session duration")
+	ErrSessionNotFound = errors.New("sessión no encontrada")
+	ErrSessionBlocked  = errors.New("sessión esta bloqueada")
+	ErrInvalidSession  = errors.New("token de sessión invalido")
+	ErrSessionExpired  = errors.New("sessión a expirado")
+	ErrInvalidDuration = errors.New("duración de sesión no válida")
+	ErrInvalidToken    = errors.New("token invalido")
 )
 
 type SessionUseCase struct {
@@ -29,7 +30,7 @@ func NewSessionUseCase(repo repositories.SessionRepository) *SessionUseCase {
 
 // CreateSession crea una nueva sesión para un usuario
 func (uc *SessionUseCase) CreateSession(ctx context.Context, userID, userAgent, clientIP string, refreshToken string, duration time.Duration) (*domain.Session, error) {
-	
+
 	if duration <= 0 {
 		return nil, ErrInvalidDuration
 	}
@@ -108,4 +109,3 @@ func (uc *SessionUseCase) UpdateSession(ctx context.Context, session *domain.Ses
 	session.UpdatedAt = time.Now() // Actualiza la fecha de modificación
 	return uc.repo.UpdateSession(ctx, session)
 }
-
