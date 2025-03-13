@@ -27,9 +27,9 @@ func main() {
 	// Conectar a la base de datos
 	dsn := fmt.Sprintf(
 		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
-		configs.GetEnv("POSTGRES_USER", "admin_user"),
+		configs.GetEnv("POSTGRES_USER", "localhost"),
 		configs.GetEnv("POSTGRES_PASSWORD", "S3cur3P@ssw0rd!"),
-		configs.GetEnv("DB_HOST", "postgres_auth"), 
+		configs.GetEnv("DB_HOST", "postgres_auth"),
 		configs.GetEnv("DB_PORT", "5432"),
 		configs.GetEnv("POSTGRES_DB", "auth_pg_db"),
 	)
