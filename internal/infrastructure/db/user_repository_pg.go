@@ -40,6 +40,24 @@ func (r *UserRepositoryPg) Create(ctx context.Context, user *domain.User) error 
 	return nil
 }
 
+func (r *UserRepositoryPg) FindByID(ctx context.Context, id uuid.UUID) (*domain.User, error) {
+	var user domain.User
+	query := `SELECT id, identification, name, lastname, email, password, role, active, created_at, updated_at, lastlogin_at FROM users WHERE id = $1`
+	err := r.db.QueryRowContext(ctx, query, id).Scan(
+		&user.ID, &user.Identification, &user.Name, &user.Lastname, &user.Email, &user.Password, &user.Role,
+		&user.Active, &user.CreatedAt, &user.UpdatedAt, &user.LastLoginAt,
+	)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, usecases.ErrUserNotFound
+	}
+	if err != nil {
+		return nil, fmt.Errorf("error al buscar usuario por ID: %w", err)
+	}
+
+	return &user, nil
+}
+
 func (r *UserRepositoryPg) FindByIdentification(ctx context.Context, identification string) (*domain.User, error) {
 	var user domain.User
 	query := `SELECT id, identification, email, password, active, created_at, updated_at FROM users WHERE identification = $1`
@@ -73,21 +91,37 @@ func (r *UserRepositoryPg) FindByEmail(ctx context.Context, email string) (*doma
 }
 
 func (r *UserRepositoryPg) Update(ctx context.Context, user *domain.User) error {
-	query := `UPDATE users SET identification = $1, email = $2, password = $3, active = $4, updated_at = $5 WHERE id = $6`
-	_, err := r.db.ExecContext(ctx, query, user.Identification, user.Email, user.Password, user.Active, user.UpdatedAt, user.ID)
+	query := `UPDATE users 
+              SET identification = $1, email = $2, password = $3, active = $4, updated_at = $5 
+              WHERE id = $6`
+	
+	result, err := r.db.ExecContext(ctx, query, 
+		user.Identification, user.Email, user.Password, user.Active, user.UpdatedAt, user.ID)
 
 	if err != nil {
-		return errors.New("error al actualizar el usuario")
+		return fmt.Errorf("error al actualizar el usuario: %w", err)
 	}
+
+	rowsAffected, _ := result.RowsAffected()
+	if rowsAffected == 0 {
+		return usecases.ErrUserNotFound // Si el usuario no existe
+	}
+
 	return nil
 }
 
 func (r *UserRepositoryPg) Delete(ctx context.Context, id uuid.UUID) error {
 	query := `DELETE FROM users WHERE id = $1`
-	_, err := r.db.ExecContext(ctx, query, id)
 
+	result, err := r.db.ExecContext(ctx, query, id)
 	if err != nil {
-		return errors.New("error al eliminar el usuario")
+		return fmt.Errorf("error al eliminar el usuario: %w", err)
 	}
+
+	rowsAffected, _ := result.RowsAffected()
+	if rowsAffected == 0 {
+		return usecases.ErrUserNotFound // Error si el usuario no existe
+	}
+
 	return nil
 }

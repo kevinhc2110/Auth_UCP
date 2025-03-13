@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -76,18 +77,38 @@ func (h *UserHandler) GetUserByEmail(c *gin.Context) {
 
 // UpdateUser maneja la solicitud para actualizar un usuario
 func (h *UserHandler) UpdateUser(c *gin.Context) {
+	// Obtener el ID del usuario autenticado desde el token JWT
+	userID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "No autorizado"})
+		return
+	}
+
 	var user domain.User
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos: " + err.Error()})
 		return
 	}
 
-	// Verificar si el usuario existe antes de actualizarlo
-	_, err := h.userUseCase.GetUserByIdentification(c.Request.Context(), user.Identification)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Usuario no encontrado, no se puede actualizar"})
+	// Validar que el usuario autenticado solo pueda actualizar su propio perfil
+	if userID != user.ID.String() {
+		c.JSON(http.StatusForbidden, gin.H{"error": "No puedes actualizar este usuario"})
 		return
 	}
+
+	// Verificar si el usuario existe antes de actualizarlo
+	existingUser, err := h.userUseCase.GetUserByIdentification(c.Request.Context(), user.Identification)
+	if err != nil {
+		if errors.Is(err, usecases.ErrUserNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Usuario no encontrado, no se puede actualizar"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al buscar usuario"})
+		}
+		return
+	}
+
+	// Mantener el mismo ID para evitar cambios malintencionados
+	user.ID = existingUser.ID
 
 	if err := h.userUseCase.UpdateUser(c.Request.Context(), &user); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al actualizar usuario"})
@@ -97,35 +118,26 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Usuario actualizado exitosamente"})
 }
 
-// func (h *UserHandler) DeleteUser(c *gin.Context) {
-// 	idStr := c.Param("id")
-// 	id, err := uuid.Parse(idStr)
-// 	if err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": "ID inválido"})
-// 		return
-// 	}
 
-// 	// Verificar si el usuario existe antes de eliminarlo
-// 	_, err = h.userUseCase.GetUserByID(c.Request.Context(), id)
-// 	if err != nil {
-// 		if errors.Is(err, usecases.ErrUserNotFound) {
-// 			c.JSON(http.StatusNotFound, gin.H{"error": "Usuario no encontrado, no se puede eliminar"})
-// 			return
-// 		}
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al verificar usuario"})
-// 		return
-// 	}
-
-// 	if err := h.userUseCase.DeleteUser(c.Request.Context(), id); err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al eliminar usuario"})
-// 		return
-// 	}
-
-// 	c.JSON(http.StatusOK, gin.H{"message": "Usuario eliminado exitosamente"})
-// }
-
-// DeleteUser maneja la solicitud para eliminar un usuario
 func (h *UserHandler) DeleteUser(c *gin.Context) {
+	// Obtener el ID del usuario autenticado desde el token JWT
+	userIDRaw, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "No autorizado"})
+		return
+	}
+
+	// Convertir userID a uuid.UUID
+	userID, err := uuid.Parse(fmt.Sprintf("%v", userIDRaw))
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "ID de usuario inválido"})
+		return
+	}
+
+	// Obtener el rol del usuario autenticado
+	role, _ := c.Get("role")
+
+	// Obtener el ID del usuario a eliminar desde la URL
 	idStr := c.Param("id")
 	id, err := uuid.Parse(idStr)
 	if err != nil {
@@ -133,8 +145,26 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 		return
 	}
 
+	// Verificar si el usuario autenticado es el mismo que intenta eliminar o si es admin
+	if userID != id && role != "admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "No puedes eliminar este usuario"})
+		return
+	}
+
+	// Verificar si el usuario existe antes de eliminarlo
+	_, err = h.userUseCase.GetUserByID(c.Request.Context(), id) 
+	if err != nil {
+		if errors.Is(err, usecases.ErrUserNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Usuario no encontrado"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al buscar usuario"})
+		}
+		return
+	}
+
+	// Eliminar usuario
 	if err := h.userUseCase.DeleteUser(c.Request.Context(), id); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al eliminar usuario"})
 		return
 	}
 

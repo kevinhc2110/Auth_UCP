@@ -8,17 +8,23 @@ import (
 // SetupRoutes define las rutas de la API
 func SetupRoutes(router *gin.Engine, authHandler *handlers.AuthHandler, userHandler *handlers.UserHandler) {
 	api := router.Group("/api")
-	api.Use(AuthMiddleware())
-	{
-		// Rutas de autenticación
-		api.POST("/login", authHandler.Login)
-		api.POST("/refresh", authHandler.RefreshToken)
-		api.POST("/logout", authHandler.Logout)
-		api.GET("/public-key", handlers.PublicKeyHandler)
 
-		// Rutas de usuario
+	{
+		// Rutas de autenticación y usuarios
+		api.POST("/login", authHandler.Login)
 		api.POST("/register", userHandler.CreateUser)
-		// api.PUT("/users", userHandler.UpdateUser)
-		// api.DELETE("/users/:id", userHandler.DeleteUser)
+
+	}
+
+	// Rutas protegidas
+	protected := api.Group("/")
+	protected.Use(AuthMiddleware()) // 🔐 Middleware aplicado
+
+	{
+		protected.PUT("/users", userHandler.UpdateUser)
+		protected.DELETE("/users/:id", userHandler.DeleteUser)
+		protected.POST("/refresh", authHandler.RefreshToken)
+		protected.POST("/logout", authHandler.Logout)
+		protected.GET("/public-key", handlers.PublicKeyHandler)
 	}
 }

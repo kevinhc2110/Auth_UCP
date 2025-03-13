@@ -61,6 +61,15 @@ func (uc *UserUseCase) CreateUser(ctx context.Context, user *domain.User) error 
 }
 
 // GetUserByID obtiene un usuario por su ID
+func (uc *UserUseCase) GetUserByID(ctx context.Context, ID uuid.UUID) (*domain.User, error) {
+	user, err := uc.repo.FindByID(ctx, ID)
+	if err != nil {
+		return nil, ErrUserNotFound
+	}
+	return user, nil
+}
+
+// GetUserByIdentification obtiene un usuario por su identification
 func (uc *UserUseCase) GetUserByIdentification(ctx context.Context, identification string) (*domain.User, error) {
 	user, err := uc.repo.FindByIdentification(ctx, identification)
 	if err != nil {

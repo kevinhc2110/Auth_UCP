@@ -4,4 +4,8 @@
 .env.*.local
 
 # Ignorar clava segura
-internal/security/private.pem
+internal/infrastructure/security/private.pem
+internal/infrastructure/security/public.pem
+
+# Ignorar archivos docker
+docker-compose.yaml

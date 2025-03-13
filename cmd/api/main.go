@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/gin-gonic/gin"
@@ -24,12 +25,22 @@ func main() {
 	configs.LoadEnv()
 
 	// Conectar a la base de datos
-	dsn := configs.GetEnv("DATABASE_URL", "DATABASE_URL")
+	dsn := fmt.Sprintf(
+		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		configs.GetEnv("POSTGRES_USER", "admin_user"),
+		configs.GetEnv("POSTGRES_PASSWORD", "S3cur3P@ssw0rd!"),
+		configs.GetEnv("DB_HOST", "postgres_auth"), 
+		configs.GetEnv("DB_PORT", "5432"),
+		configs.GetEnv("POSTGRES_DB", "auth_pg_db"),
+	)
+
+	fmt.Println("DSN:", dsn)
+
 	database, err := db.NewPostgresDB(dsn)
 	if err != nil {
 		log.Fatalf("Error al conectar a la base de datos: %v", err)
 	}
-	defer database.Close() // Cerrar conexión al salir
+	defer database.Close()
 
 	// Crear repositorio de usuarios
 	userRepo := db.NewUserRepositoryPg(database)

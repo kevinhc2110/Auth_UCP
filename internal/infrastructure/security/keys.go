@@ -14,7 +14,7 @@ var (
 
 // Cargar claves RSA desde archivos
 func LoadKeys() error {
-	privKeyBytes, err := os.ReadFile("internal/security/private.pem")
+	privKeyBytes, err := os.ReadFile("internal/infrastructure/security/private.pem")
 	if err != nil {
 		return err
 	}
@@ -24,7 +24,7 @@ func LoadKeys() error {
 		return err
 	}
 
-	pubKeyBytes, err := os.ReadFile("internal/security/public.pem")
+	pubKeyBytes, err := os.ReadFile("internal/infrastructure/security/public.pem")
 	if err != nil {
 		return err
 	}
