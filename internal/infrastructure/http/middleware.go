@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/kevinhc2110/Degree-project-UCP/internal/infrastructure/security"
+	"github.com/kevinhc2110/Auth_UCP/internal/infrastructure/security"
 )
 
 // AuthMiddleware verifica el JWT antes de permitir acceso al handler

@@ -5,12 +5,13 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
-	"github.com/kevinhc2110/Degree-project-UCP/internal/infrastructure/configs"
-	"github.com/kevinhc2110/Degree-project-UCP/internal/infrastructure/db"
-	"github.com/kevinhc2110/Degree-project-UCP/internal/infrastructure/http"
-	"github.com/kevinhc2110/Degree-project-UCP/internal/infrastructure/http/handlers"
-	"github.com/kevinhc2110/Degree-project-UCP/internal/infrastructure/security"
-	"github.com/kevinhc2110/Degree-project-UCP/internal/usecases"
+
+	"github.com/kevinhc2110/Auth_UCP/internal/infrastructure/configs"
+	"github.com/kevinhc2110/Auth_UCP/internal/infrastructure/db"
+	"github.com/kevinhc2110/Auth_UCP/internal/infrastructure/http"
+	"github.com/kevinhc2110/Auth_UCP/internal/infrastructure/http/handlers"
+	"github.com/kevinhc2110/Auth_UCP/internal/infrastructure/security"
+	"github.com/kevinhc2110/Auth_UCP/internal/usecases"
 )
 
 func main() {
@@ -27,14 +28,12 @@ func main() {
 	// Conectar a la base de datos
 	dsn := fmt.Sprintf(
 		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
-		configs.GetEnv("POSTGRES_USER", "localhost"),
-		configs.GetEnv("POSTGRES_PASSWORD", "S3cur3P@ssw0rd!"),
-		configs.GetEnv("DB_HOST", "postgres_auth"),
-		configs.GetEnv("DB_PORT", "5432"),
-		configs.GetEnv("POSTGRES_DB", "auth_pg_db"),
+		configs.GetEnv("POSTGRES_USER", ""),
+		configs.GetEnv("POSTGRES_PASSWORD", ""),
+		configs.GetEnv("DB_HOST", ""),
+		configs.GetEnv("DB_PORT", ""),
+		configs.GetEnv("POSTGRES_DB", ""),
 	)
-
-	fmt.Println("DSN:", dsn)
 
 	database, err := db.NewPostgresDB(dsn)
 	if err != nil {

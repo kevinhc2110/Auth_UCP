@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/kevinhc2110/Degree-project-UCP/internal/usecases"
+	"github.com/kevinhc2110/Auth_UCP/internal/usecases"
 )
 
 type AuthHandler struct {
@@ -36,10 +36,10 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	session, accessToken, err := h.authUseCase.Authenticate(c.Request.Context(), req.Email, req.Password, userAgent, clientIP)
 	if err != nil {
 		if errors.Is(err, usecases.ErrInvalidCredentials) {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Correo o contraseña incorrectos"})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al procesar la autenticación"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -70,7 +70,7 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Token inválido"})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al refrescar el token"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -93,7 +93,7 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Sesión no encontrada"})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al cerrar sesión"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -104,7 +104,7 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 func PublicKeyHandler(c *gin.Context) {
 	pubKey, err := os.ReadFile("public.pem")
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Clave pública no disponible"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	c.Data(http.StatusOK, "application/x-pem-file", pubKey)

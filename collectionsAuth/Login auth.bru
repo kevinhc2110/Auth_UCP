@@ -1,0 +1,19 @@
+meta {
+  name: Login auth
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://localhost:8080/api/login
+  body: json
+  auth: bearer
+}
+
+body:json {
+  {
+    "email": "usuario1@example.com",
+    "password": "Password_seguro21"
+  }
+  
+}

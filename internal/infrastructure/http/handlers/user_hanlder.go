@@ -7,8 +7,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/kevinhc2110/Degree-project-UCP/internal/domain"
-	"github.com/kevinhc2110/Degree-project-UCP/internal/usecases"
+	"github.com/kevinhc2110/Auth_UCP/internal/domain"
+	"github.com/kevinhc2110/Auth_UCP/internal/usecases"
 )
 
 // UserHandler maneja las solicitudes relacionadas con usuarios
@@ -25,7 +25,7 @@ func NewUserHandler(userUseCase *usecases.UserUseCase) *UserHandler {
 func (h *UserHandler) CreateUser(c *gin.Context) {
 	var user domain.User
 	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -34,7 +34,7 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 			c.JSON(http.StatusConflict, gin.H{"error": "El usuario ya existe"})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al crear usuario"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -51,7 +51,7 @@ func (h *UserHandler) GetUserByIdentification(c *gin.Context) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Usuario no encontrado"})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al obtener usuario"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -68,7 +68,7 @@ func (h *UserHandler) GetUserByEmail(c *gin.Context) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Usuario no encontrado"})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al obtener usuario"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -102,7 +102,7 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 		if errors.Is(err, usecases.ErrUserNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Usuario no encontrado, no se puede actualizar"})
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al buscar usuario"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		}
 		return
 	}
@@ -111,7 +111,7 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 	user.ID = existingUser.ID
 
 	if err := h.userUseCase.UpdateUser(c.Request.Context(), &user); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al actualizar usuario"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -157,14 +157,14 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 		if errors.Is(err, usecases.ErrUserNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Usuario no encontrado"})
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al buscar usuario"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		}
 		return
 	}
 
 	// Eliminar usuario
 	if err := h.userUseCase.DeleteUser(c.Request.Context(), id); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al eliminar usuario"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 

@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
-	"github.com/kevinhc2110/Degree-project-UCP/internal/infrastructure/http/handlers"
+	"github.com/kevinhc2110/Auth_UCP/internal/infrastructure/http/handlers"
 )
 
 // Server representa el servidor HTTP

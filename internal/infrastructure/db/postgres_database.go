@@ -15,7 +15,7 @@ func NewPostgresDB(dsn string) (*sql.DB, error) {
 	}
 
 	if err := db.Ping(); err != nil {
-		db.Close() // Cerrar la conexión si falla el ping
+		db.Close() 
 		return nil, fmt.Errorf("error en la conexión a la base de datos: %w", err)
 	}
 

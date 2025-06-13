@@ -3,14 +3,15 @@ package usecases
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/kevinhc2110/Degree-project-UCP/internal/domain"
-	"github.com/kevinhc2110/Degree-project-UCP/pck/validation"
+	"github.com/kevinhc2110/Auth_UCP/internal/domain"
+	"github.com/kevinhc2110/Auth_UCP/pck/validation"
 
-	"github.com/kevinhc2110/Degree-project-UCP/internal/infrastructure/security"
-	"github.com/kevinhc2110/Degree-project-UCP/internal/repositories"
+	"github.com/kevinhc2110/Auth_UCP/internal/infrastructure/security"
+	"github.com/kevinhc2110/Auth_UCP/internal/repositories"
 )
 
 var (
@@ -39,6 +40,11 @@ func (uc *UserUseCase) CreateUser(ctx context.Context, user *domain.User) error 
 		return ErrEmailAlreadyExists
 	}
 
+	// Si el usuario vacio, asignarle el rol de usuario
+	if user.Role == "" {
+		user.Role = string(domain.RoleUser) 
+	}
+
 	// Cifrar la contraseña
 	hashedPassword, err := security.HashPassword(user.Password)
 	if err != nil {
@@ -51,6 +57,8 @@ func (uc *UserUseCase) CreateUser(ctx context.Context, user *domain.User) error 
 	user.CreatedAt = time.Now()
 	user.UpdatedAt = time.Now()
 	user.Active = true
+	fmt.Printf("ANTES DE GUARDAR: %+v\n", user)
+
 
 	// Guardar el usuario en la base de datos
 	if err := uc.repo.Create(ctx, user); err != nil {

@@ -1,0 +1,21 @@
+meta {
+  name: Logout auth
+  type: http
+  seq: 4
+}
+
+post {
+  url: http://localhost:8080/api/logout
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: 
+}
+
+body:json {
+  {
+    "refresh_token": "a340f44a-347d-4789-a8c5-f98450236e0d"
+  } 
+}

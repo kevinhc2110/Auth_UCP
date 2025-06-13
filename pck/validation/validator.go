@@ -7,7 +7,7 @@ import (
 	"unicode"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/kevinhc2110/Degree-project-UCP/internal/domain"
+	"github.com/kevinhc2110/Auth_UCP/internal/domain"
 )
 
 var validate = validator.New()

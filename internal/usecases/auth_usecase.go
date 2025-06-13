@@ -5,9 +5,9 @@ import (
 	"errors"
 	"time"
 
-	"github.com/kevinhc2110/Degree-project-UCP/internal/domain"
-	"github.com/kevinhc2110/Degree-project-UCP/internal/infrastructure/security"
-	"github.com/kevinhc2110/Degree-project-UCP/internal/repositories"
+	"github.com/kevinhc2110/Auth_UCP/internal/domain"
+	"github.com/kevinhc2110/Auth_UCP/internal/infrastructure/security"
+	"github.com/kevinhc2110/Auth_UCP/internal/repositories"
 )
 
 
@@ -33,12 +33,12 @@ func (uc *AuthUseCase) Authenticate(ctx context.Context, email, password, userAg
 	}
 
 	// Verificar contraseña
-	if !security.ComparePassword(password, user.Password) {
+	if !security.ComparePassword(user.Password, password) {
 		return nil, "", ErrInvalidCredentials
 	}
 
 	// Generar token JWT
-	accessToken, err := security.GenerateToken(user.ID.String(), string(user.Role), 12*time.Hour)
+	accessToken, err := security.GenerateToken(user.ID.String(), user.Role, 12*time.Hour)
 	if err != nil {
 		return nil, "", errors.New("error generating access token")
 	}

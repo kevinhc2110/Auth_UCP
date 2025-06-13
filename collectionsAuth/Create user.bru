@@ -1,0 +1,23 @@
+meta {
+  name: Create user
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:8080/api/register
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "identification": "92030232",
+    "name": "Alfredo",
+    "lastname": "Garin",
+    "email": "usuario1@example.com",
+    "password": "Password_seguro21",
+    "active": true
+  }
+  
+}

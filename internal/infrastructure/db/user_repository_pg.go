@@ -7,9 +7,9 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"github.com/kevinhc2110/Degree-project-UCP/internal/domain"
-	"github.com/kevinhc2110/Degree-project-UCP/internal/repositories"
-	"github.com/kevinhc2110/Degree-project-UCP/internal/usecases"
+	"github.com/kevinhc2110/Auth_UCP/internal/domain"
+	"github.com/kevinhc2110/Auth_UCP/internal/repositories"
+	"github.com/kevinhc2110/Auth_UCP/internal/usecases" 
 	"github.com/lib/pq"
 )
 

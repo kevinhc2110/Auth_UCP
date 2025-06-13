@@ -1,4 +1,4 @@
-module github.com/kevinhc2110/Degree-project-UCP
+module github.com/kevinhc2110/Auth_UCP
 
 go 1.24.1
 

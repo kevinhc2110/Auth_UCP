@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/kevinhc2110/Degree-project-UCP/internal/domain"
+	"github.com/kevinhc2110/Auth_UCP/internal/domain"
 )
 
 type UserRepository interface {

@@ -2,7 +2,7 @@ package http
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/kevinhc2110/Degree-project-UCP/internal/infrastructure/http/handlers"
+	"github.com/kevinhc2110/Auth_UCP/internal/infrastructure/http/handlers"
 )
 
 // SetupRoutes define las rutas de la API
